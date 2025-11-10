@@ -1,0 +1,3 @@
+# Ignore all files in the postgres directory
+/postgres/*
+/postgres-data/*
