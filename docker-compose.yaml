@@ -67,7 +67,6 @@ services:
       - INPUT_TOPIC=${INPUT_TOPIC}
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
       - WINDOW_DURATION=${WINDOW_DURATION}
-      - MESSAGES_PER_WINDOW=${MESSAGES_PER_WINDOW}
     env_file:
       - .env
     volumes:

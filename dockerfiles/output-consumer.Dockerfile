@@ -19,5 +19,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the consumer source code
 COPY output_consumer/ .
 
-# Command to run the consumer script
-CMD ["python", "output_consumer_postgres.py"]
+# Command to run the appropriate consumer script based on STREAM environment variable
+CMD ["/bin/sh", "-c", "\
+    echo The value of STREAM environment variable is: $STREAM; \
+    if [ \"$STREAM\" = \"stable\" ]; then \
+        echo 'Running stable output consumer...'; \
+        python stable_output_consumer_postgres.py; \
+    else \
+        echo 'Running atlantis output consumer...'; \
+        python atlantis_output_consumer_postgres.py; \
+    fi \
+"]

@@ -20,9 +20,9 @@ COPY stream/*.py .
 
 CMD ["/bin/sh", "-c", "\
     echo The value of STREAM environment variable is: $STREAM; \
-    if [ \"$STREAM\" = \"reddit\" ]; then \
-        echo 'Starting Reddit stream generator script...'; \
-        python kafka_stream_generation_reddit.py; \
+    if [ \"$STREAM\" = \"atlantis\" ]; then \
+        echo 'Starting Atlantis stream generator script...'; \
+        python atlantis_stream_generation.py; \
     else \
         echo 'Starting custom stream generator script...'; \
         python custom_stream_generation.py; \

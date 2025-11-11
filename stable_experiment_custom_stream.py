@@ -119,7 +119,6 @@ user_task.configure(
     sink_operation=write_to_kafka
 )
 
-
 # Step 2: Define what Data Quality means for you
 user_task.check(dqm.count('event_type'), name="has_events") \
    .check(dqm.distinct_count('event_type'), name="event_variety") \

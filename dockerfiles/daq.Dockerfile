@@ -20,13 +20,13 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app/pathway
 
 COPY stable_experiment_custom_stream.py .
-COPY scalability_experiment_reddit.py .
+COPY atlantis_experiment_stream.py .
 
 CMD ["/bin/sh", "-c", "\
     echo The value of STREAM environment variable is: $STREAM; \
-    if [ \"$STREAM\" = \"reddit\" ]; then \
-        echo 'Starting Stream DaQ for burst stream processing on Reddit dataset...'; \
-        pathway spawn --processes ${SPARK_NUM_CORES} python ./scalability_experiment_reddit.py; \
+    if [ \"$STREAM\" = \"atlantis\" ]; then \
+        echo 'Starting Stream DaQ for atlantis stream processing...'; \
+        pathway spawn --processes ${SPARK_NUM_CORES} python ./atlantis_experiment_stream.py; \
     else \
         echo 'Starting Stream DaQ for stable stream processing on an never ending custom dataset...'; \
         pathway spawn --processes ${SPARK_NUM_CORES} python ./stable_experiment_custom_stream.py; \
