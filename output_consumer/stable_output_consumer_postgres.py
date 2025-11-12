@@ -49,7 +49,7 @@ def create_performance_table_if_not_exists(conn):
         window_setting TEXT,
         number_of_cores TEXT,
         number_of_threads TEXT,
-        latency BIGINT,
+        latency REAL,
         throughput REAL,
         created_at TIMESTAMPTZ DEFAULT now()
     );
@@ -87,9 +87,9 @@ def write_results_to_performance(message_value: dict, conn) -> None:
     window_setting = get_window_short_name(WINDOW_TYPE, WINDOW_DURATION_STR, SLIDE_DURATION_STR, GAP_DURATION_STR)
     number_of_cores = NUM_CORES
     number_of_threads = NUM_THREADS
-    latency = message_value.get('kafka_time') - message_value.get('time')  # in milliseconds
+    latency = (message_value.get('kafka_time') - message_value.get('time')) / 1000  # in seconds
     # Throughput is calculated as number of events divided by latency
-    throughput = message_value.get('has_events') / latency  # in milliseconds
+    throughput = message_value.get('has_events') / latency  # in seconds
 
     insert_sql = sql.SQL("""
     INSERT INTO {table} (

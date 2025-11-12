@@ -35,7 +35,7 @@ def main():
                 "user_id": f"user_{i % 10}",  # 10 different users
                 "event_type": "purchase" if i % 3 == 0 else "view",
                 "amount": round(10 + (i * 1.5) % 100, 2),
-                "timestamp": int(timestamp),  # milliseconds
+                "timestamp": int(timestamp.timestamp()),  # in seconds
                 "session_id": f"session_{i // 5}",  # 5 events per session
             }
 
