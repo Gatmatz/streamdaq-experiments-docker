@@ -23,8 +23,11 @@ CMD ["/bin/sh", "-c", "\
     if [ \"$STREAM\" = \"atlantis\" ]; then \
         echo 'Starting Atlantis stream generator script...'; \
         python atlantis_stream_generation.py; \
+    elif [ \"$STREAM\" = \"stable\" ]; then \
+        echo 'Starting Stable stream generator script...'; \
+        python stable_stream_generation.py; \
     else \
-        echo 'Starting custom stream generator script...'; \
-        python custom_stream_generation.py; \
+        echo 'STREAM not set to atlantis or stable — starting default pathway experiment...'; \
+        python atlantis_stream_generation.py; \
     fi \
 "]

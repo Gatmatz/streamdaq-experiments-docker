@@ -22,11 +22,14 @@ COPY output_consumer/ .
 # Command to run the appropriate consumer script based on STREAM environment variable
 CMD ["/bin/sh", "-c", "\
     echo The value of STREAM environment variable is: $STREAM; \
-    if [ \"$STREAM\" = \"stable\" ]; then \
+    if [ \"$STREAM\" = \"atlantis\" ]; then \
+        echo 'Running atlantis output consumer...'; \
+        python atlantis_output_consumer_postgres.py; \
+    elif [ \"$STREAM\" = \"stable\" ]; then \
         echo 'Running stable output consumer...'; \
         python stable_output_consumer_postgres.py; \
     else \
-        echo 'Running atlantis output consumer...'; \
-        python atlantis_output_consumer_postgres.py; \
+        echo 'STREAM not set to atlantis or stable — defaulting to pathway output consumer...'; \
+        python pathway_output_consumer_postgres.py; \
     fi \
 "]
