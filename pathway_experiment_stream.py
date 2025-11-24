@@ -1,3 +1,6 @@
+import random
+from datetime import datetime
+
 from streamdaq.Windows import tumbling, sliding, session
 import os, time
 import pathway as pw
@@ -25,7 +28,7 @@ print(f"MESSAGES_PER_WINDOW_LIST: {MESSAGES_PER_WINDOW_LIST}")
 print(f"WINDOW_TYPE: {WINDOW_TYPE}")
 print(f"GAP_DURATION_STR: {GAP_DURATION_STR}")
 
-
+# ==== Helper Functions ====
 def standardize_timestamp_to_milliseconds(_) -> str:
     return str(int(time.time() * 1e3))
 
@@ -62,7 +65,7 @@ def get_window_from_string(window_type_string: str):
             print(f"Unknown window type: {window_str}. Falling back to tumbling.")
             return tumbling(duration=parse_duration(WINDOW_DURATION_STR))
 
-
+# ==== Schema Definition ====
 class AtlantisDataSchema(pw.Schema):
     timestamp: int
     angle_0: float
@@ -566,6 +569,7 @@ class AtlantisDataSchema(pw.Schema):
     angle_498: float
     angle_499: float
 
+# ==== Connection Settings ====
 rdkafka_settings = {
     "bootstrap.servers": KAFKA_SERVER,
     "security.protocol": "plaintext",
@@ -582,15 +586,51 @@ postgres_settings = {
     "password": "dq_pass",
 }
 
+# ==== Data Sources: From Python and Kafka ====
+class AtlantisEventsSource(pw.io.python.ConnectorSubject):
+    def run(self):
+        while True:
+            timestamp = datetime.now()
 
-data = (pw.io.kafka.read(
-    rdkafka_settings,
-    topic=INPUT_KAFKA_TOPIC,
-    format="json",
-    schema=AtlantisDataSchema,
-    autocommit_duration_ms=int(READ_FROM_KAFKA_EVERY_MS),
-))
+            # Generate message with only angles and timestamp
+            message = {
+                "timestamp": int(timestamp.timestamp()),  # In seconds
+            }
 
+            message.update(generate_angle_data())
+
+            self.next(**message)
+            time.sleep(0.9)
+
+# data = (pw.io.kafka.read(
+#     rdkafka_settings,
+#     topic=INPUT_KAFKA_TOPIC,
+#     format="json",
+#     schema=AtlantisDataSchema,
+#     autocommit_duration_ms=int(READ_FROM_KAFKA_EVERY_MS),
+# ))
+
+def generate_angle_data():
+    """Generate 500 columns with angle_{number} and random float values"""
+    angles = {}
+    for i in range(500):
+        angles[f"angle_{i}"] = round(random.uniform(0.0, 360.0), 6)
+    return angles
+
+def read_from_python():
+    while True:
+        timestamp = datetime.now()
+
+        # Generate message with only angles and timestamp
+        message = {
+            "timestamp": int(timestamp.timestamp()),  # In seconds
+        }
+
+        message.update(generate_angle_data())
+
+
+
+# Two output functions: to Kafka and to file
 def write_to_kafka(data: pw.internals.Table) -> None:
     pw.io.kafka.write(
         table=data,
@@ -610,6 +650,11 @@ def write_to_file(data: pw.internals.Table) ->  None:
 measures = {
     f'angle_{i}': pw.reducers.count(f'angle_{i}') for i in range(500)
 }
+
+
+# ==== MAIN DRIVER CODE ====
+
+data = pw.io.python.read(AtlantisEventsSource(), schema=AtlantisDataSchema)
 
 data = data.windowby(
             data['timestamp'],
