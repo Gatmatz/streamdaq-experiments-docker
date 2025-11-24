@@ -607,6 +607,7 @@ atlantis_task = daq.new_task("atlantis_monitoring", critical=True)
 # Step 1: Configure monitoring parameters
 atlantis_task.configure(
     window=get_window_from_string(WINDOW_TYPE),
+    behavior=None,
     time_column="timestamp",
     wait_for_late=0,
     show_window_start=True,

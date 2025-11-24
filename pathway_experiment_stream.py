@@ -1,6 +1,4 @@
-from streamdaq import StreamDaQ, DaQMeasures as dqm, Windows
-from Windows import tumbling, sliding, session
-
+from streamdaq.Windows import tumbling, sliding, session
 import os, time
 import pathway as pw
 
@@ -601,11 +599,24 @@ def write_to_kafka(data: pw.internals.Table) -> None:
         format="json",
     )
 
+def write_to_file(data: pw.internals.Table) ->  None:
+    out_dir = "/data"  # container path that will be mounted to your host
+    os.makedirs(out_dir, exist_ok=True)
+    pw.io.csv.write(
+        table=data,
+        filename=os.path.join(out_dir, "pathway_output.csv")
+    )
+
+measures = {
+    f'angle_{i}': pw.reducers.count(f'angle_{i}') for i in range(500)
+}
+
 data = data.windowby(
             data['timestamp'],
             window=get_window_from_string(WINDOW_TYPE),
-        ).reduce(count=pw.reducers.count('angle_0'))
+            behavior=pw.temporal.common_behavior(delay=10, cutoff=2, keep_results=False)
+        ).reduce(**measures)
 
-write_to_kafka(data)
+write_to_file(data)
 
 pw.run()
